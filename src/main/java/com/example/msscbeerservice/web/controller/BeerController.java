@@ -1,8 +1,9 @@
 package com.example.msscbeerservice.web.controller;
 
 
-import com.example.msscbeerservice.service.BeerService;
+import com.example.msscbeerservice.service.BeerServiceImpl;
 import com.example.msscbeerservice.web.model.BeerDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,15 +18,15 @@ public class BeerController {
     private static final Integer DEFAULT_PAGE_NUMBER = 0;
     private static final Integer DEFAULT_PAGE_SIZE = 25;
 
-//    @Autowired
-//    BeerService beerServiceImpl;
+    @Autowired
+    BeerServiceImpl beerServiceImpl;
 
 
-    private final BeerService beerServiceImpl;
-
-    public BeerController(BeerService beerServiceImpl) {
-        this.beerServiceImpl = beerServiceImpl;
-    }
+//    private final BeerService beerServiceImpl;
+//
+//    public BeerController(BeerService beerServiceImpl) {
+//        this.beerServiceImpl = beerServiceImpl;
+//    }
 
 //    @GetMapping(produces = { "application/json" }, path = "beer")
 //    public ResponseEntity<BeerPagedList> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
