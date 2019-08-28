@@ -1,9 +1,14 @@
 package com.example.msscbeerservice.web.controller;
 
 
+import com.example.msscbeerservice.exception.MyException;
 import com.example.msscbeerservice.service.BeerServiceImpl;
 import com.example.msscbeerservice.web.model.BeerDto;
+import com.example.msscbeerservice.web.model.BeerPagedList;
+import com.example.msscbeerservice.web.model.BeerStyleEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -11,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+
+@Slf4j
 @RequestMapping("/api/v1/")
 @RestController
 public class BeerController {
@@ -21,61 +28,79 @@ public class BeerController {
     @Autowired
     BeerServiceImpl beerServiceImpl;
 
-
-//    private final BeerService beerServiceImpl;
-//
-//    public BeerController(BeerService beerServiceImpl) {
-//        this.beerServiceImpl = beerServiceImpl;
-//    }
-
-//    @GetMapping(produces = { "application/json" }, path = "beer")
-//    public ResponseEntity<BeerPagedList> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-//                                                   @RequestParam(value = "pageSize", required = false) Integer pageSize,
-//                                                   @RequestParam(value = "beerName", required = false) String beerName,
-//                                                   @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
-//                                                   @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand){
-//
-//        if (showInventoryOnHand == null) {
-//            showInventoryOnHand = false;
-//        }
-//
-//        if (pageNumber == null || pageNumber < 0){
-//            pageNumber = DEFAULT_PAGE_NUMBER;
-//        }
-//
-//        if (pageSize == null || pageSize < 1) {
-//            pageSize = DEFAULT_PAGE_SIZE;
-//        }
-//
-//        BeerPagedList beerList = beerServiceImpl.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
-//
-//        return new ResponseEntity<>(beerList, HttpStatus.OK);
-//    }
+    @GetMapping(produces = {"application/json"}, path = "beer")
+    public ResponseEntity<BeerPagedList> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+                                                   @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                   @RequestParam(value = "beerName", required = false) String beerName,
+                                                   @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
+                                                   @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) throws Exception {
+        try {
+            if (showInventoryOnHand == null) {
+                showInventoryOnHand = false;
+            }
+            if (pageNumber == null || pageNumber < 0) {
+                pageNumber = DEFAULT_PAGE_NUMBER;
+            }
+            if (pageSize == null || pageSize < 1) {
+                pageSize = DEFAULT_PAGE_SIZE;
+            }
+            BeerPagedList beerList = beerServiceImpl.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
+            return new ResponseEntity<>(beerList, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new MyException("Spiacenti si è verificato un errore imprevisto!");
+        }
+    }
 
     @GetMapping("beer/{beerId}")
     public ResponseEntity<BeerDto> getBeerById(@PathVariable("beerId") UUID beerId,
-                                               @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand){
-        if (showInventoryOnHand == null) {
-            showInventoryOnHand = false;
+                                               @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) throws Exception {
+        try {
+            if (showInventoryOnHand == null) {
+                showInventoryOnHand = false;
+            }
+
+            return new ResponseEntity<>(beerServiceImpl.getById(beerId, showInventoryOnHand), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new MyException("Spiacenti si è verificato un errore imprevisto!");
+        }
+    }
+
+    @GetMapping("beerUpc/{upc}")
+    public ResponseEntity<BeerDto> getBeerByUpc(@PathVariable("upc") String upc) throws Exception {
+        try {
+            return new ResponseEntity<>(beerServiceImpl.getByUpc(upc), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new MyException("Spiacenti si è verificato un errore imprevisto!");
+        }
+    }
+
+    @PostMapping(path = "beer")
+    public ResponseEntity saveNewBeer(@RequestBody @Validated BeerDto beerDto) throws Exception {
+        try {
+            return new ResponseEntity<>(beerServiceImpl.saveNewBeer(beerDto), HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new MyException("Spiacenti si è verificato un errore imprevisto!");
+        }
+    }
+
+    @PutMapping("beer/{beerId}")
+    public ResponseEntity updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto) throws Exception {
+        try {
+            return new ResponseEntity<>(beerServiceImpl.updateBeer(beerId, beerDto), HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new MyException("Spiacenti si è verificato un errore imprevisto!");
         }
 
-        return new ResponseEntity<>(beerServiceImpl.getById(beerId, showInventoryOnHand), HttpStatus.OK);
-
     }
-
-//    @GetMapping("beerUpc/{upc}")
-//    public ResponseEntity<BeerDto> getBeerByUpc(@PathVariable("upc") String upc){
-//        return new ResponseEntity<>(beerServiceImpl.getByUpc(upc), HttpStatus.OK);
-//    }
-//
-    @PostMapping(path = "beer")
-    public ResponseEntity saveNewBeer(@RequestBody @Validated BeerDto beerDto){
-        return new ResponseEntity<>(beerServiceImpl.saveNewBeer(beerDto), HttpStatus.CREATED);
-    }
-//
-//    @PutMapping("beer/{beerId}")
-//    public ResponseEntity updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto){
-//        return new ResponseEntity<>(beerServiceImpl.updateBeer(beerId, beerDto), HttpStatus.NO_CONTENT);
-//    }
 
 }

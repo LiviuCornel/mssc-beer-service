@@ -43,6 +43,7 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public BeerDto getByUpc(String upc) {
+
         return null;
     }
 
